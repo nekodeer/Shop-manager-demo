@@ -1,10 +1,15 @@
 import React, { Fragment, useState} from 'react'
 
-export default function EditableCell(props:any) {
+interface EditCellProps{
+  value:{id:number,data:string},
+  setState: (arg:string,id:number)=>void
+}
+
+export default function EditableCell(props:EditCellProps) {
 
   const {setState} = props
 
-  const [isEdit,setEdit] = useState(false)
+  const [isEdit,setEdit] = useState<boolean>(false)
   const [value,setValue] = useState(props.value.data)
   
   return (

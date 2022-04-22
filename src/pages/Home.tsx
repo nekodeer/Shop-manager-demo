@@ -2,7 +2,6 @@ import React from 'react'
 import { Layout, Menu, Button, message, } from 'antd';
 import { AppstoreOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate, Link, Outlet } from 'react-router-dom';
-import { LoginApi } from '../request/api';
 import { useEffect } from 'react';
 
 export default function Home() {
@@ -15,10 +14,6 @@ export default function Home() {
     localStorage.clear();
     navigate('/login')
   }
-  // const testAxios = () => {
-  //   LoginApi({ username: 'admin', password: '123456' }).then((res: any) => console.log(res), err => console.log(err))
-  // }
-
   useEffect(() => {
     if (!localStorage.getItem('username')) {
       message.warning('Please login first!');

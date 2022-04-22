@@ -1,11 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Pagination, Button, message, Divider, Alert } from 'antd';
 import { RequestApi } from '../../request/api';
+import { __String } from 'typescript';
+
+interface Product {
+  id: number|string;
+  product_name: string;
+  product_category: string;
+  unit_price: string;
+}
+
+interface EditRow{
+  status:boolean,
+  id:number|string,
+}
 
 export default function ProductListEditRow() {
 
-  const [rawData, setRawData] = useState<any[]>([])
-  const [data, setData] = useState<any[]>([])
+  const [rawData, setRawData] = useState<Product[]>([])
+  const [data, setData] = useState<Product[]>([])
   const [curPage, setCurpage] = useState<number>(1);
   const [totalItem, settotalItem] = useState<number>(1);
   const [currentdata, setCurrentdata] = useState<any[]>([])
@@ -40,36 +53,39 @@ export default function ProductListEditRow() {
   }
 
   //delete the row
-  const deleteRow = (id: number) => {
+  const deleteRow = (id: number|string) => {
     const newData = data.filter((dataObj) => {
       return dataObj.id !== id;
     })
     setData(newData)
   }
 
-  const [editRow, setEditRow] = useState({ status: false, id: 0 })
-  const editCurRow = (id: number) => {
+  const [editRow, setEditRow] = useState<EditRow>({ status: false, id: 0 })
+  const editCurRow = (id: number|string) => {
     setEditRow({ status: true, id })
     const product = data.filter((o) => o.id === id)
     setProduct(product[0])
   }
   //save the value of the cell into product state when editing row, then replace it in the data array
-  const [product, setProduct] = useState({
+  const [product, setProduct] = useState<Product>({
     id: 0,
     product_name: '',
     product_category: '',
     unit_price: ''
   })
 
-  const saveRow = (id: number) => {
+  const saveRow = (id: number|string) => {
     setEditRow({ status: false, id: id })
     // setEditRow({status:false,id})
-    data.forEach((dataObj) => {
+    const newData = data.map((dataObj) => {
       if (dataObj.id === product.id) {
         return { ...dataObj, ...product }
       }
+      else {
+        return dataObj
+      }
     })
-    setData(data);
+    setData(newData);
     //set the product value to initial state after save the row to prevent its value being used by other row
     setProduct({
       id: 0,
@@ -98,11 +114,26 @@ export default function ProductListEditRow() {
       setAddButton(false)
     }
   }
+
+  //set the product when edit the cell input value
+  const handleSetProduct = (e: any, id: number|string) => {
+
+    //above and below are 2 different way to set the product. Below js will find the target row and set the input value according to the product key,since edit the table can get the original id it does not have to assign the ID to the product
+    product[e.target.dataset.attr as keyof Product] = e.target.value;
+  }
+  //set the product value when add the new product 
+  const handleAddNewProduct = (e: any, id: number|string, cellCategory: string) => {
+
+    product[cellCategory as keyof Product] = e.target.value;
+    //add new product must assign the new ID
+    setProduct({ ...product, id})
+  }
+
   return (
     <div>
       <Alert
         banner={true}
-        message="Important Informational"
+        message="Important Information"
         description="For this page, the product data IS received from the server. Single cell is NOT editable, but you can click the Edit button to edit the whole row."
         type="info"
         showIcon
@@ -121,14 +152,15 @@ export default function ProductListEditRow() {
           </tr>
         </thead>
         <tbody>
-          {data.map((data: any) => {
-            return <tr className='tr' key={data.id}>
+          {data.map((data: Product) => {
+            const flag = editRow.status && editRow.id === data.id
+            return <tr className='tr' key={data.id} onChange={(e) => handleSetProduct(e, data.id)}>
               <td scope="row" className='td'>{data.id}</td>
-              <td className='td'>{editRow.status && editRow.id === data.id ? <input type="text" defaultValue={data.product_name} onChange={(e) => setProduct({ ...product, id: data.id, product_name: e.target.value })} /> : <p>{data.product_name}</p>}</td>
+              <td className='td'>{flag ? <input type="text" data-attr='product_name' defaultValue={data.product_name} /> : <p>{data.product_name}</p>}</td>
 
-              <td className='td'>{editRow.status && editRow.id === data.id ? <input type="text" defaultValue={data.product_category} onChange={(e) => setProduct({ ...product, id: data.id, product_category: e.target.value })} /> : <p>{data.product_category}</p>}</td>
+              <td className='td'>{flag ? <input type="text" data-attr='product_category' defaultValue={data.product_category} /> : <p>{data.product_category}</p>}</td>
 
-              <td className='td'>{editRow.status && editRow.id === data.id ? <input type="text" defaultValue={data.unit_price} onChange={(e) => setProduct({ ...product, id: data.id, unit_price: e.target.value })} /> : <p>{data.unit_price}</p>}</td>
+              <td className='td'>{flag ? <input type="text" data-attr='unit_price' defaultValue={data.unit_price} /> : <p>{data.unit_price}</p>}</td>
               <td className='td'>
                 {editRow.id === data.id && (editRow.status) ? <Button size='small' onClick={() => saveRow(data.id)}>Save</Button> : <Button size='small' onClick={() => editCurRow(data.id)}>Edit</Button>}&nbsp;
                 <Button size='small' onClick={() => deleteRow(data.id)}>DELETE</Button>
@@ -137,9 +169,9 @@ export default function ProductListEditRow() {
           })}
           {addButton ? <tr className='tr'>
             <th className='th'>{rawData.length + 1}</th>
-            <th className='th'><input type="text" onChange={(e) => setProduct({ ...product, id: rawData.length + 1, product_name: e.target.value })} /></th>
-            <th className='th'><input type="text" onChange={(e) => setProduct({ ...product, id: rawData.length + 1, product_category: e.target.value })} /></th>
-            <th className='th'><input type="text" onChange={(e) => setProduct({ ...product, id: rawData.length + 1, unit_price: e.target.value })} /></th>
+            <th className='th'><input type="text" onChange={(e) => handleAddNewProduct(e, rawData.length + 1, 'product_name')} /></th>
+            <th className='th'><input type="text" onChange={(e) => handleAddNewProduct(e, rawData.length + 1, 'product_category')} /></th>
+            <th className='th'><input type="text" onChange={(e) => handleAddNewProduct(e, rawData.length + 1, 'unit_price')} /></th>
             <th className='th'><Button size='small' onClick={saveNewProduct}>Save</Button></th>
           </tr> : null}
         </tbody>

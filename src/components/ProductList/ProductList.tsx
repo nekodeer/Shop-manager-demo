@@ -12,8 +12,12 @@ export interface Item {
   unit_price: number;
 }
 
-interface searchInterface {
-  (a: string, b: string): void
+interface fnPropInterface {
+  (a: string, b?: string): void
+}
+
+interface getProduct{
+  (product:Item):void
 }
 
 interface ProductObj {
@@ -195,7 +199,7 @@ const EditableTable = () => {
     };
   });
   //filter the data to match the product category and set the data array
-  const searchProp: searchInterface = (arg, option) => {
+  const searchProp: fnPropInterface = (arg, option) => {
     if (arg === '') {
       setSearchData(!searchData)
     } else {
@@ -212,7 +216,7 @@ const EditableTable = () => {
     }
   }
   //get new product from quick add item component
-  const getNewProduct = (product: Item) => {
+  const getNewProduct:getProduct = (product) => {
     setData([...data, product])
     setIsAdding(false);
     AddNewProductApi(product).then((res) => {

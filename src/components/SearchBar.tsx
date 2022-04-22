@@ -3,7 +3,7 @@ import { Input, Select, Space } from 'antd';
 
 //限定props类型
 type FnProps = {
-  searchProp(value:string, option:string): void;
+  searchProp:(value:string, option:string)=> void;
 };
 
 export default function SearchBar(props:FnProps) {

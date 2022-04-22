@@ -4,26 +4,32 @@ import { useNavigate } from 'react-router-dom';
 import { LoginApi } from '../request/api';
 import { Link } from 'react-router-dom';
 
+//when submit the form, the values must contains the username and the password
+type LoginDetail = {
+  username: string,
+  password: string
+}
+
 export default function Login() {
 
   const navigate = useNavigate();
 
-  const onFinish = (values: any) => {
+  const onFinish = (values: LoginDetail) => {
     localStorage.clear()
-    LoginApi({username:values.username, password:values.password}).then((res: any) => {
+    LoginApi({ username: values.username, password: values.password }).then((res: any) => {
       if (res.code === '0000') {
-        const {token,verifySuccess, userInfo} = res.data       
+        const { token, verifySuccess, userInfo } = res.data
         if (verifySuccess) {
-          const {username,email,address} = userInfo
+          const { username, email, address } = userInfo
           localStorage.setItem('username', username)
           localStorage.setItem('email', email)
           localStorage.setItem('address', address)
-          localStorage.setItem('token',token)
+          localStorage.setItem('token', token)
           message.success('Login Sunccess')
           console.log(localStorage);
-          
+
           setTimeout(() => navigate('/home'), 1500)
-        }else{
+        } else {
           message.error('Login Failed, try again!')
         }
       }

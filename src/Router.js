@@ -1,3 +1,4 @@
+import Detail from "./components/Detail"
 import EditableTable from "./components/ProductList/ProductList"
 import ProductList2 from "./components/ProductList/ProductListCombine"
 import ProductListEditRow from "./components/ProductList/ProductListEdieRow"
@@ -38,6 +39,9 @@ const route = [
     },{
       path:'userProfile',
       element: <UserProfile/>
+    },{
+      path:'edit/:id',
+      element:<Detail/>
     }]
   },{
     path:'*',

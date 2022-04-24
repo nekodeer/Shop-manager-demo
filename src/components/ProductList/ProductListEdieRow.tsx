@@ -21,7 +21,7 @@ export default function ProductListEditRow() {
   const [data, setData] = useState<Product[]>([])
   const [curPage, setCurpage] = useState<number>(1);
   const [totalItem, settotalItem] = useState<number>(1);
-  const [currentdata, setCurrentdata] = useState<any[]>([])
+  const [currentdata, setCurrentdata] = useState<Product[][]>([])
   const pagesize = 6;
 
   const spliceResult = (result: any[], dataArray: object[]) => {
@@ -95,7 +95,7 @@ export default function ProductListEditRow() {
     })
   }
 
-  const [addButton, setAddButton] = useState(false);
+  const [addButton, setAddButton] = useState<boolean>(false);
   const addProduct = () => {
     setAddButton(!addButton)
   }

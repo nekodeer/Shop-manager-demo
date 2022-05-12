@@ -4,15 +4,15 @@ import { RequestApi } from '../../request/api';
 import { __String } from 'typescript';
 
 interface Product {
-  id: number|string;
+  id: number | string;
   product_name: string;
   product_category: string;
   unit_price: string;
 }
 
-interface EditRow{
-  status:boolean,
-  id:number|string,
+interface EditRow {
+  status: boolean,
+  id: number | string,
 }
 
 export default function ProductListEditRow() {
@@ -22,7 +22,8 @@ export default function ProductListEditRow() {
   const [curPage, setCurpage] = useState<number>(1);
   const [totalItem, settotalItem] = useState<number>(1);
   const [currentdata, setCurrentdata] = useState<Product[][]>([])
-  const pagesize = 6;
+  const [pagesize,setPageSize] = useState<number>(6);
+
 
   const spliceResult = (result: any[], dataArray: object[]) => {
     for (let i = 0, len = dataArray.length; i < len; i += pagesize) {
@@ -36,24 +37,36 @@ export default function ProductListEditRow() {
     //save the result to a state, set the initial page data to the 1 element of the result group
     //when page changes, set the data with the result element according to pages, 
     //since the state of the data changes, it render different data without sending ajax request
-    RequestApi().then((res) => {
+    RequestApi().then((res: any) => {
+      //replace the key of prodID to 'key'
+      const newRes = JSON.parse(JSON.stringify(res).replace(/prodId/g, 'id'))
+      const item: any = newRes.map((dataObj: any) => {
+        if (dataObj.category) {
+          return { id: dataObj.prodId, product_name: dataObj.title, product_category: dataObj.category.categoryName, unit_price: dataObj.price, ...dataObj }
+        }
+        else {
+          return { id: dataObj.prodId, product_name: dataObj.title, product_category: "Undefined Category", unit_price: dataObj.price, ...dataObj }
+        }
+      })
+      setData(item)
       let result: any[] = [];
-      spliceResult(result, res.data);
+      spliceResult(result, item);
       setData(result[curPage - 1])
       setCurrentdata(result);
-      setRawData(res.data)
-      settotalItem(res.data.length)
+      setRawData(item)
+      settotalItem(item.length)
     }, (err) => { console.log(err) })
-  }, [totalItem])
+  }, [totalItem,pagesize])
 
   //when click the page, get the page number and set the data according to the page
-  const getPage = (e: number) => {
-    setCurpage(e);
-    setData(currentdata[e - 1])
+  const getPage = (page: number,pageSize: number) => {
+    setCurpage(page);
+    setPageSize(pageSize);
+    setData(currentdata[page - 1])
   }
 
   //delete the row
-  const deleteRow = (id: number|string) => {
+  const deleteRow = (id: number | string) => {
     const newData = data.filter((dataObj) => {
       return dataObj.id !== id;
     })
@@ -61,7 +74,7 @@ export default function ProductListEditRow() {
   }
 
   const [editRow, setEditRow] = useState<EditRow>({ status: false, id: 0 })
-  const editCurRow = (id: number|string) => {
+  const editCurRow = (id: number | string) => {
     setEditRow({ status: true, id })
     const product = data.filter((o) => o.id === id)
     setProduct(product[0])
@@ -74,7 +87,7 @@ export default function ProductListEditRow() {
     unit_price: ''
   })
 
-  const saveRow = (id: number|string) => {
+  const saveRow = (id: number | string) => {
     setEditRow({ status: false, id: id })
     // setEditRow({status:false,id})
     const newData = data.map((dataObj) => {
@@ -116,17 +129,17 @@ export default function ProductListEditRow() {
   }
 
   //set the product when edit the cell input value
-  const handleSetProduct = (e: any, id: number|string) => {
+  const handleSetProduct = (e: any, id: number | string) => {
 
     //above and below are 2 different way to set the product. Below js will find the target row and set the input value according to the product key,since edit the table can get the original id it does not have to assign the ID to the product
     product[e.target.dataset.attr as keyof Product] = e.target.value;
   }
   //set the product value when add the new product 
-  const handleAddNewProduct = (e: any, id: number|string, cellCategory: string) => {
+  const handleAddNewProduct = (e: any, id: number | string, cellCategory: string) => {
 
     product[cellCategory as keyof Product] = e.target.value;
     //add new product must assign the new ID
-    setProduct({ ...product, id})
+    setProduct({ ...product, id })
   }
 
   return (
@@ -181,7 +194,7 @@ export default function ProductListEditRow() {
         showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
         defaultPageSize={pagesize}
         defaultCurrent={1}
-        onChange={(e) => getPage(e)}
+        onChange={(page,pageSize) => getPage(page,pageSize)}
       />
     </div>
   )

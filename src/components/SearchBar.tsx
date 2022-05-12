@@ -18,6 +18,7 @@ export default function SearchBar(props:FnProps) {
     }>
       <Option value="Category">Category</Option>
       <Option value="Product Name">Product Name</Option>
+      <Option value="Product ID">Product ID</Option>
     </Select>
   )
   const inputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,7 +31,7 @@ export default function SearchBar(props:FnProps) {
 
   return (
     <Space direction="vertical">
-      <Input addonBefore={selectBefore} placeholder={option==='Category'?'Search by Category':'Search Product Name'} onChange={(e) => inputHandler(e)} onPressEnter={search} />
+      <Input addonBefore={selectBefore} placeholder={option==='Category'?'Search by Category':option==='Product Name'?'Search Product Name':'Search Product ID'} onChange={(e) => inputHandler(e)} onPressEnter={search} />
     </Space>
   )
 }

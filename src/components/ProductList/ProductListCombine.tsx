@@ -28,30 +28,63 @@ export default function ProductList2() {
   const [curPage, setCurpage] = useState<number>(1);
   const [totalItem, settotalItem] = useState<number>(1);
   const [currentdata, setCurrentdata] = useState<any[]>([])
-  const pagesize = 6;
+  const [pagesize,setPageSize] = useState<number>(10);
+
+  const spliceResult = (result: any[], dataArray: object[]) => {
+    for (let i = 0, len = dataArray.length; i < len; i += pagesize) {
+      result.push(dataArray.slice(i, i + pagesize));
+    }
+  }
+
   //process data array according to the pagination
+  // useEffect(() => {
+  //   //divide the original data array into small arrays, each small array contains the element of the current page
+  //   //save the result to a state, set the initial page data to the 1 element of the result group
+  //   //when page changes, set the data with the result element according to pages, 
+  //   //since the state of the data changes, it render different data without sending ajax request
+  //   RequestApi().then((res) => {
+  //     let result = [];
+  //     for (let i = 0, len = res.data.length; i < len; i += pagesize) {
+  //       result.push(res.data.slice(i, i + pagesize));
+  //     }
+  //     setData(result[curPage - 1])
+  //     // setData(result)
+  //     setCurrentdata(result);
+  //     setRawData(res.data)
+  //     settotalItem(res.data.length)
+  //   }, (err) => { console.log(err) })
+  // }, [totalItem])
   useEffect(() => {
     //divide the original data array into small arrays, each small array contains the element of the current page
     //save the result to a state, set the initial page data to the 1 element of the result group
     //when page changes, set the data with the result element according to pages, 
     //since the state of the data changes, it render different data without sending ajax request
-    RequestApi().then((res) => {
-      let result = [];
-      for (let i = 0, len = res.data.length; i < len; i += pagesize) {
-        result.push(res.data.slice(i, i + pagesize));
-      }
+    RequestApi().then((res: any) => {
+      //replace the key of prodID to 'key'
+      const newRes = JSON.parse(JSON.stringify(res).replace(/prodId/g, 'id'))
+      const item: any = newRes.map((dataObj: any) => {
+        if (dataObj.category) {
+          return { id: dataObj.prodId, product_name: dataObj.title, product_category: dataObj.category.categoryName, unit_price: dataObj.price, ...dataObj }
+        }
+        else {
+          return { id: dataObj.prodId, product_name: dataObj.title, product_category: "Undefined Category", unit_price: dataObj.price, ...dataObj }
+        }
+      })
+      setData(item)
+      let result: any[] = [];
+      spliceResult(result, item);
       setData(result[curPage - 1])
-      // setData(result)
       setCurrentdata(result);
-      setRawData(res.data)
-      settotalItem(res.data.length)
+      setRawData(item)
+      settotalItem(item.length)
     }, (err) => { console.log(err) })
-  }, [totalItem])
+  }, [totalItem,pagesize])
 
   //when click the page, get the page number and set the data according to the page
-  const getPage = (e: number) => {
-    setCurpage(e);
-    setData(currentdata[e - 1])
+  const getPage = (page: number,pageSize: number) => {
+    setCurpage(page);
+    setPageSize(pageSize);
+    setData(currentdata[page - 1])
   }
   //delete the row
   const deleteRow:ModifyRow = (id) => {
@@ -177,9 +210,9 @@ export default function ProductList2() {
       <Pagination
         total={totalItem}
         showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
-        defaultPageSize={pagesize}
+        defaultPageSize={10}
         defaultCurrent={1}
-        onChange={(e) => getPage(e)}
+        onChange={(page,pageSize) => getPage(page,pageSize)}
       />
     </div>
   )

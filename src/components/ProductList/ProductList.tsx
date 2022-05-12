@@ -238,8 +238,10 @@ const EditableTable = () => {
     } else {
       const newData = option === 'Category' ? initData.filter((data: Item) => {
         return data.product_category.toLowerCase() === arg.toLowerCase()
-      }) : initData.filter((data: Item) => {
+      }) : option === 'Category' ?initData.filter((data: Item) => {
         return data.product_name.toLowerCase().match(arg.toLowerCase())
+      }):initData.filter((data: Item) => {
+        return data.key === parseInt(arg)
       })
       setData(newData);
       if (newData.length === 0) {
@@ -293,7 +295,7 @@ const EditableTable = () => {
           rowClassName="editable-row"
           pagination={{
             onChange: cancel,
-            pageSize: 7
+            pageSize: 10
           }}
         />
       </Form>

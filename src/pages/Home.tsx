@@ -22,7 +22,7 @@ export default function Home() {
       }, 2000);
     }
   }, [localStorage])
-
+  
   return (
     <Layout style={{ height: '100vh' }}>
       <Header className="header">

@@ -9,4 +9,4 @@ export const UpdateProduct = (params) => request.put('/api/productlist/update',p
 
 export const AddNewProductApi = (params) => request.post('/addproduct',params)
 
-export const GetProductListNew = () => request.get('/api/products')
+export const GetProductListNew = () => request.get('/api/products') 

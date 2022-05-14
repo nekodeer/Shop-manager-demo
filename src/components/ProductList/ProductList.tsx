@@ -32,7 +32,7 @@ const originData: Item[] = [];
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;
   dataIndex: string;
-  title: any;
+  title: string;
   inputType: 'number' | 'text';
   record: Item;
   index: number;

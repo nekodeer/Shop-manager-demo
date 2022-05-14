@@ -3,49 +3,38 @@ import { useLocation } from 'react-router-dom'
 import { Descriptions, Divider, Input, Row, Col, Button, message } from 'antd';
 import MyBreadcrumb from './Breadcrumb';
 
-interface Category {
-  // [categoryId: string]: any,
-  categoryId: string,
-  categoryName: string,
-  prodTypeId: number,
-}
-
 interface IDetailItem {
   key: number,
-  category: Category,
+  categoryId?: string | number,
+  categoryName?: string,
+  prodTypeId?: number | string,
   product_name: string,
-  unit_price: number | string,
+  unit_price: number,
   availableStock: number,
   description: string,
   totalStock: number,
   title: string,
   subTitle: string,
   createOn: string,
-  discount: number | string,
+  discount: number,
   productMedia: Array<object>
 }
-// interface IDetailItem {
-//   [key: string]: any,
-//   category: Category,
-//   product_name: string,
-//   unit_price: number,
-//   availableStock: number,
-//   description: string,
-//   totalStock: number,
-//   title: string,
-//   subTitle: string,
-//   createOn: string,
-//   discount: number,
-//   productMedia: Array<any>
-// }
 
 export default function Detail() {
   const location: any = useLocation();
   const product = location.state[0];
   const { key, product_name, category, unit_price, availableStock, description, totalStock, title, subTitle, createOn, discount, productMedia } = product;
-  const newProduct: IDetailItem = { key, product_name, category, unit_price, availableStock, description, totalStock, title, subTitle, createOn, discount, productMedia }
-  // console.log(newProduct);
 
+  let categoryId = 'unknown';
+  let categoryName = 'unknown';
+  let prodTypeId = 'unknown';
+
+  if (category !== null) {
+    categoryId= category.categoryId;
+    categoryName= category.categoryName;
+    prodTypeId= category.prodTypeId;
+  }
+  const newProduct: any = { key, product_name, categoryId, categoryName, prodTypeId, unit_price, availableStock, description, totalStock, title, subTitle, createOn, discount, productMedia }
   // //below code get some part of the key and value from product object and combine them to a new object for mapping
   // const pick = (obj: any, arr: any) => arr.reduce((iter: any, val: any) => (val in obj && (iter[val] = obj[val]), iter), {})
   // let descriptionItem = pick(product, ['product_name', 'unit_price', 'discount', 'title', 'subTitle', 'description', ' createOn', 'availableStock', 'totalStock'])
@@ -60,27 +49,9 @@ export default function Detail() {
   }
 
 
-  function updateProduct<K extends keyof IDetailItem, T extends keyof Category>(e: any, value: K, category?: T) {
-    // if (value.toString() === 'categoryId' || value.toString() === 'categoryName' || value.toString() === 'prodTypeId') {
-    if (value.toString() ==='category') {
-      if (category === 'categoryId' || category === 'categoryName' || category === 'prodTypeId') {
-
-        //check if the type of the value that needs to be change is string or number
-        typeof (item.category[category]) === 'string' ? item.category[category] = e.target.value : item.category[category] = e.target.valueAsNumber;
-        // if (item[value]) {
-        //   typeof (item[value]) === 'string' ? item[value] = e.target.value : item[value] = parseFloat(e.target.value);
-        // }
-        setItem(item)
-      }
-    }
-
-    else {
-      typeof (item[value]) === 'string' ? item[value] = e.target.value : item[value]  = e.target.valueAsNumber;
-      setItem(item)
-    }
-    // else{
-    //   typeof (item[value]) === 'string' ? setItem() : item[value] = parseFloat(e.target.value);
-    // }
+  const updateProduct = <K extends keyof IDetailItem>(e: any, value: K) =>{
+    typeof (item[value]) === 'string' ? item[value] = e.target.value : item[value] = e.target.valueAsNumber;
+    setItem(item)
   }
 
   return (
@@ -109,13 +80,13 @@ export default function Detail() {
         <Descriptions.Item label="Unit Price $" >{isEdit ? <Input type='number' defaultValue={item.unit_price} onChange={(e) => updateProduct(e, 'unit_price')} /> : item.unit_price}</Descriptions.Item>
         <Descriptions.Item label="Discount" >{isEdit ? <Input type='number' defaultValue={item.discount} onChange={(e) => updateProduct(e, 'discount')} /> : item.discount}</Descriptions.Item>
         <Descriptions.Item label="Category ID" >
-          {item.category ? isEdit ? <Input type='number' defaultValue={item.category.categoryId} onChange={(e) => updateProduct(e,'category','categoryId')} /> : item.category.categoryId : `undefined`}
+          {isEdit ? <Input type='number' defaultValue={item.categoryId} onChange={(e) => updateProduct(e, 'categoryId')} /> : item.categoryId}
         </Descriptions.Item>
         <Descriptions.Item label="Category Name" >
-          {item.category ? isEdit ? <Input type='text' defaultValue={item.category.categoryName} onChange={(e) => updateProduct(e, 'category','categoryName')} /> : item.category.categoryName : `undefined`}
+          {isEdit ? <Input type='text' defaultValue={item.categoryName} onChange={(e) => updateProduct(e, 'categoryName')} /> : item.categoryName}
         </Descriptions.Item>
         <Descriptions.Item label="Product Type Id">
-          {item.category ? isEdit ? <Input type='number' defaultValue={item.category.prodTypeId} onChange={(e) => updateProduct(e, 'category','prodTypeId')} /> : item.category.prodTypeId : `undefined`}
+          {isEdit ? <Input type='number' defaultValue={item.prodTypeId} onChange={(e) => updateProduct(e, 'prodTypeId')} /> : item.prodTypeId}
         </Descriptions.Item>
         <Descriptions.Item label="Title" >{isEdit ? <Input type='text' defaultValue={item.title} onChange={(e) => updateProduct(e, 'title')} /> : item.title}</Descriptions.Item>
         <Descriptions.Item label="Sub Title" span={2}>

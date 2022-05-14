@@ -93,10 +93,12 @@ const EditableTable = () => {
       const newRes = JSON.parse(JSON.stringify(res).replace(/prodId/g, 'key'))
       const item: Item[] = newRes.map((dataObj: any) => {
         if (dataObj.category) {
+          // return { key: dataObj.id, product_name: dataObj.title, product_category: dataObj.category.categoryName, unit_price: dataObj.price, ...dataObj }
           return { key: dataObj.prodId, product_name: dataObj.title, product_category: dataObj.category.categoryName, unit_price: dataObj.price, ...dataObj }
         }
         else {
           return { key: dataObj.prodId, product_name: dataObj.title, product_category: "Undefined Category", unit_price: dataObj.price, ...dataObj }
+          // return { key: dataObj.id, product_name: dataObj.title, product_category: "Undefined Category", unit_price: dataObj.price, ...dataObj }
         }
       })
       setData(item)

@@ -3,10 +3,11 @@ import { Form, Input, Button, Checkbox, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { LoginApi } from '../request/api';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 //when submit the form, the values must contains the username and the password
 type LoginDetail = {
-  username: string,
+  email: string,
   password: string
 }
 
@@ -16,25 +17,26 @@ export default function Login() {
 
   const onFinish = (values: LoginDetail) => {
     localStorage.clear()
-    LoginApi({ username: values.username, password: values.password }).then((res: any) => {
-      if (res.code === '0000') {
-        const { token, verifySuccess, userInfo } = res.data
-        if (verifySuccess) {
-          const { username, email, address } = userInfo
-          localStorage.setItem('username', username)
-          localStorage.setItem('email', email)
-          localStorage.setItem('address', address)
-          localStorage.setItem('token', token)
-          message.success('Login Sunccess')
-          console.log(localStorage);
-
-          setTimeout(() => navigate('/home'), 1500)
-        } else {
-          message.error('Login Failed, try again!')
-        }
+    const params = { email: values.email, password: values.password }
+    LoginApi(params).then((res: any) => {
+      if (res.token) {
+        const { token, user_id } = res.token
+        const { created_at, email, role, updated_at } = res.user
+        localStorage.setItem('email', email)
+        localStorage.setItem('user_id', user_id)
+        localStorage.setItem('token', token)
+        localStorage.setItem('role', role)
+        localStorage.setItem('created_at', created_at)
+        localStorage.setItem('updated_at', updated_at)
+        message.success('Login Success')
+        setTimeout(() => navigate('/home'), 1500)
+      } else {
+        message.error('Something error occur, please try again later')
       }
-    },
-      err => console.log(err))
+    }, (err) => {
+      console.log(err)
+      message.error('Login Failed, check your username/password!')
+    })
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -54,11 +56,11 @@ export default function Login() {
         autoComplete="off"
       >
         <Form.Item
-          label="Username"
-          name="username"
-          rules={[{ required: true, message: 'Please input your username!' }]}
+          label="Email"
+          name="email"
+          rules={[{ required: true, message: 'Please input your Email!' }]}
         >
-          <Input placeholder='username' />
+          <Input placeholder='Email' />
         </Form.Item>
 
         <Form.Item

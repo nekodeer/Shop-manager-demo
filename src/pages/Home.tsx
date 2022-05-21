@@ -15,7 +15,7 @@ export default function Home() {
     navigate('/login')
   }
   useEffect(() => {
-    if (!localStorage.getItem('username')) {
+    if (!localStorage.getItem('token')) {
       message.warning('Please login first!');
       setTimeout(() => {
         navigate('/login')
@@ -27,7 +27,7 @@ export default function Home() {
     <Layout style={{ height: '100vh' }}>
       <Header className="header">
         <Menu theme="dark" mode="horizontal">
-          <Menu.Item key="1" onClick={() => navigate('userProfile')}><span>{localStorage.getItem('username')}</span></Menu.Item>
+          <Menu.Item key="1" onClick={() => navigate('userProfile')}><span>{localStorage.getItem('email')}</span></Menu.Item>
           <Menu.Item key="2"><Button onClick={logOut}>Log Out</Button></Menu.Item>
           {/* <Menu.Item key="3"><Button onClick={testAxios}>Test</Button></Menu.Item> */}
         </Menu>
@@ -48,6 +48,7 @@ export default function Home() {
             </SubMenu>
             <SubMenu key="sub2" icon={<UserOutlined />} title="User Profile">
               <Menu.Item key="21"><Link to='userProfile'>User Info</Link></Menu.Item>
+              <Menu.Item key="22"><Link to='timesheet'>User Timesheet</Link></Menu.Item>
             </SubMenu>
           </Menu>
         </Sider>

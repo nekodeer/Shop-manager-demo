@@ -1,31 +1,28 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Table, Input, InputNumber, Popconfirm, Form, Typography, message, Button, Space, Row, Col, Alert } from 'antd';
-import { AddNewProductApi, GetProductListNew, RequestApi, UpdateProduct } from '../../request/api';
+import { Table, Input, InputNumber, Popconfirm, Form, Typography, message, Button, Space, Row, Col, Alert} from 'antd';
+import { AddNewProductApi, DeleteProduct, GetProductListNew, RequestApi, UpdateProduct} from '../../request/api';
 import SearchBar from '../SearchBar'
 import QuickAddItem from '../QuickAddItem'
 import { Breakpoint } from 'antd/lib/_util/responsiveObserve';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export interface Item {
-  key: number;
-  product_name: string;
-  product_category: string;
-  unit_price: number;
+  key: number,
+  category_id: number,
+  price: number,
+  description: string,
+  title: string,
+  created_at?: string,
+  updated_at?: string,
+  is_active?: number,
+  product_image?: string
 }
-
 interface fnPropInterface {
   (a: string, b?: string): void
 }
 
 interface getProduct {
   (product: Item): void
-}
-
-interface ProductObj {
-  product_name: string;
-  product_category: string;
-  unit_price: number;
-  key: string | number;
 }
 
 const originData: Item[] = [];
@@ -78,38 +75,38 @@ const EditableTable = () => {
   const [data, setData] = useState<Item[]>(originData);
   const [editingKey, setEditingKey] = useState<string | number>('');
   const [searchData, setSearchData] = useState<boolean>(false);
-  const [initData, setInitData] = useState<Item[]>(originData);
   const [isAdding, setIsAdding] = useState<boolean>(false)
-  // const [newProduct, setNewProduct] = useState<object>({})
   const navigate = useNavigate();
 
   const handleDelete = (key: React.Key) => {
-    setData(data.filter(item => item.key !== key))
+    DeleteProduct(key).then((res:any) =>{
+      if(res===true){
+        setData(data.filter(item => item.key !== key))
+      }
+    },
+    (err) => console.log(err))
   };
 
   useEffect(() => {
     GetProductListNew().then((res: any) => {
       //replace the key of prodID to 'key'
-      const newRes = JSON.parse(JSON.stringify(res).replace(/prodId/g, 'key'))
-      const item: Item[] = newRes.map((dataObj: any) => {
-        if (dataObj.category) {
-          // return { key: dataObj.id, product_name: dataObj.title, product_category: dataObj.category.categoryName, unit_price: dataObj.price, ...dataObj }
-          return { key: dataObj.prodId, product_name: dataObj.title, product_category: dataObj.category.categoryName, unit_price: dataObj.price, ...dataObj }
+      // const newRes = JSON.parse(JSON.stringify(res).replace(/id/g, 'key'))
+      const item: Item[] = res.map((dataObj: any) => {
+        if (dataObj.category_id) {
+          return { key: dataObj.id, title: dataObj.title, category_id: dataObj.category_id, price: dataObj.price, ...dataObj }
         }
         else {
-          return { key: dataObj.prodId, product_name: dataObj.title, product_category: "Undefined Category", unit_price: dataObj.price, ...dataObj }
-          // return { key: dataObj.id, product_name: dataObj.title, product_category: "Undefined Category", unit_price: dataObj.price, ...dataObj }
+          return { key: dataObj.id, title: dataObj.title, category_id: "Undefined Category", price: dataObj.price, ...dataObj }
         }
       })
       setData(item)
-      setInitData(item)
     })
   }, [searchData])
 
   const isEditing = (record: Item) => record.key === editingKey;
 
   const edit = (record: Partial<Item> & { key: React.Key }) => {
-    form.setFieldsValue({ product_name: '', product_category: '', unit_price: '', ...record });
+    form.setFieldsValue({ title: '', category_id: '', price: '', ...record });
 
     setEditingKey(record.key);
   };
@@ -130,10 +127,6 @@ const EditableTable = () => {
           ...item,
           ...row,
         });
-        //update the product information to server
-        UpdateProduct(item).then((res) => {
-          message.success(res.data.productCheck.update + res.data.token)
-        });
         setData(newData);
         setEditingKey('');
       } else {
@@ -141,6 +134,12 @@ const EditableTable = () => {
         setData(newData);
         setEditingKey('');
       }
+      const updatedItem = { title: newData[index].title, is_active: newData[index].is_active, price: newData[index].price, description: newData[index].description, category_id: newData[index].category_id }
+      // update the product information to server
+      UpdateProduct(newData[index].key, updatedItem).then((res) => {
+        console.log('server msg',res);
+        message.success('Edit Product Success!')
+      });
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
     }
@@ -156,7 +155,7 @@ const EditableTable = () => {
     },
     {
       title: 'Name',
-      dataIndex: 'product_name',
+      dataIndex: 'title',
       width: '25%',
       editable: true,
       render: (_: any, record: Item) => {
@@ -167,23 +166,24 @@ const EditableTable = () => {
               replace: false,
               state: data.filter((o) => o.key === record.key,)
             })
-        }}>{record.product_name}</a>
+        }}>{record.title}</a>
       },
-      sorter: (a: Item, b: Item) => a.product_name.localeCompare(b.product_name)
+      sorter: (a: Item, b: Item) => a.title.localeCompare(b.title)
     },
     {
-      title: 'Category',
-      dataIndex: 'product_category',
+      title: 'Category ID',
+      dataIndex: 'category_id',
       width: '25%',
       editable: true,
-      sorter: (a: Item, b: Item) => a.product_category.localeCompare(b.product_category)
+      // sorter: (a: Item, b: Item) => a.category_id.localeCompare(b.category_id)
+      sorter: (a: Item, b: Item) => a.category_id - b.category_id,
     },
     {
       title: 'Price',
-      dataIndex: 'unit_price',
+      dataIndex: 'price',
       width: '10%',
       editable: true,
-      sorter: (a: Item, b: Item) => a.unit_price - b.unit_price,
+      sorter: (a: Item, b: Item) => a.price - b.price,
     },
     {
       title: 'Operation',
@@ -226,7 +226,7 @@ const EditableTable = () => {
       ...col,
       onCell: (record: Item) => ({
         record,
-        inputType: col.dataIndex === 'product_name' || 'product_category' ? 'string' : 'number',
+        inputType: col.dataIndex === 'title' || 'category_id' ? 'string' : 'number',
         dataIndex: col.dataIndex,
         title: col.title,
         editing: isEditing(record),
@@ -238,11 +238,13 @@ const EditableTable = () => {
     if (arg === '') {
       setSearchData(!searchData)
     } else {
-      const newData = option === 'Category' ? initData.filter((data: Item) => {
-        return data.product_category.toLowerCase() === arg.toLowerCase()
-      }) : option === 'Category' ?initData.filter((data: Item) => {
-        return data.product_name.toLowerCase().match(arg.toLowerCase())
-      }):initData.filter((data: Item) => {
+      //search by category ID
+      const newData = option === 'Category' ? data.filter((data: Item) => {
+        // return data.product_category.toLowerCase() === arg.toLowerCase()
+        return data.category_id === parseInt(arg)
+      }) : option === 'Title' ? data.filter((data: Item) => {
+        return data.title.toLowerCase().match(arg.toLowerCase())
+      }) : data.filter((data: Item) => {
         return data.key === parseInt(arg)
       })
       setData(newData);
@@ -254,10 +256,11 @@ const EditableTable = () => {
   }
   //get new product from quick add item component
   const getNewProduct: getProduct = (product) => {
-    setData([...data, product])
+    // setData([...data, product])
     setIsAdding(false);
-    AddNewProductApi(product).then((res) => {
-      message.info(res.data.productCheck.update)
+    AddNewProductApi(product).then((res:any) => {
+      const newRes = {key:res.id,...res}
+      setData([...data, newRes])
     })
   }
 

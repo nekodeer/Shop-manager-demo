@@ -17,7 +17,7 @@ export default function SearchBar(props:FnProps) {
     <Select style={{ width: 150 }} defaultValue="Category" className="select-before" onSelect={(option: string) => setOption(option)
     }>
       <Option value="Category">Category</Option>
-      <Option value="Product Name">Product Name</Option>
+      <Option value="Title">Product Title</Option>
       <Option value="Product ID">Product ID</Option>
     </Select>
   )
@@ -31,7 +31,7 @@ export default function SearchBar(props:FnProps) {
 
   return (
     <Space direction="vertical">
-      <Input addonBefore={selectBefore} placeholder={option==='Category'?'Search by Category':option==='Product Name'?'Search Product Name':'Search Product ID'} onChange={(e) => inputHandler(e)} onPressEnter={search} />
+      <Input addonBefore={selectBefore} placeholder={option==='Category'?'Search by Category':option==='Title'?'Search Product Title':'Search Product ID'} onChange={(e) => inputHandler(e)} onPressEnter={search} />
     </Space>
   )
 }

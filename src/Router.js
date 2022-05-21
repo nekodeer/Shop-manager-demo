@@ -1,9 +1,11 @@
+import { Navigate } from "react-router-dom";
 import Detail from "./components/Detail"
 import EditableTable from "./components/ProductList/ProductList"
 import ProductList2 from "./components/ProductList/ProductListCombine"
 import ProductListEditRow from "./components/ProductList/ProductListEdieRow"
 import ProductListEditableCell from "./components/ProductList/ProductListEditableCell"
-import UserProfile from "./components/UserProfile"
+import Timesheet from "./components/User/Timesheet/Timesheet";
+import UserProfile from "./components/User/UserProfile"
 import Home from "./pages/Home"
 import Login from "./pages/Login"
 import Page404 from "./pages/Page404"
@@ -12,7 +14,7 @@ import Register from "./pages/Register"
 const route = [
   {
     path: '/',
-    element: <Home />
+    element: <Navigate to="/home" />
   },
   {
     path: '/login',
@@ -42,6 +44,9 @@ const route = [
     },{
       path:'edit/:id',
       element:<Detail/>
+    },{
+      path:'timesheet',
+      element:<Timesheet/>
     }]
   },{
     path:'*',

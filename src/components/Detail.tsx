@@ -2,57 +2,52 @@ import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Descriptions, Divider, Input, Row, Col, Button, message } from 'antd';
 import MyBreadcrumb from './Breadcrumb';
+import {UpdateProduct} from '../request/api'
+import UploadPic from './UploadPic';
 
 interface IDetailItem {
   key: number,
-  categoryId?: string | number,
-  categoryName?: string,
-  prodTypeId?: number | string,
-  product_name: string,
-  unit_price: number,
-  availableStock: number,
+  category_id: string | number,
+  price: number,
   description: string,
-  totalStock: number,
   title: string,
-  subTitle: string,
-  createOn: string,
-  discount: number,
-  productMedia: Array<object>
+  created_at?: string,
+  updated_at?: string,
+  is_active: number,
+  product_image: string
 }
 
 export default function Detail() {
   const location: any = useLocation();
   const product = location.state[0];
-  const { key, product_name, category, unit_price, availableStock, description, totalStock, title, subTitle, createOn, discount, productMedia } = product;
-
-  let categoryId = 'unknown';
-  let categoryName = 'unknown';
-  let prodTypeId = 'unknown';
-
-  if (category !== null) {
-    categoryId= category.categoryId;
-    categoryName= category.categoryName;
-    prodTypeId= category.prodTypeId;
+  for (let i in product) {
+    if (product[i] === null) {
+      product[i] = 'unknown'
+    }
   }
-  const newProduct: any = { key, product_name, categoryId, categoryName, prodTypeId, unit_price, availableStock, description, totalStock, title, subTitle, createOn, discount, productMedia }
-  // //below code get some part of the key and value from product object and combine them to a new object for mapping
-  // const pick = (obj: any, arr: any) => arr.reduce((iter: any, val: any) => (val in obj && (iter[val] = obj[val]), iter), {})
-  // let descriptionItem = pick(product, ['product_name', 'unit_price', 'discount', 'title', 'subTitle', 'description', ' createOn', 'availableStock', 'totalStock'])
-  // descriptionItem = { ...descriptionItem, categoryId: category.categoryId, categoryName: category.categoryName, prodTypeId: category.prodTypeId }
+  const { key, category_id, price, description, title, created_at, updated_at, is_active, product_image } = product;
 
   const [isEdit, setIsEdit] = useState<boolean>(false)
-  const [item, setItem] = useState<IDetailItem>(newProduct)
+  const [item, setItem] = useState<IDetailItem>(product)
+  const [imgURL,setImgURL] = useState<string>('')
   const saveProduct = () => {
     setIsEdit(!isEdit);
-    message.info('Update Success, plz check log for the updated product')
-    console.log(item);
+    const updatedItem = { title: item.title, is_active: item.is_active, price: item.price, description: item.description, category_id: item.category_id }
+    // update the product information to server
+    UpdateProduct(item.key, updatedItem).then((res) => {
+      console.log('server msg', res);
+      message.success('Edit Product Success!')
+    });
   }
 
-
-  const updateProduct = <K extends keyof IDetailItem>(e: any, value: K) =>{
+  const updateProduct = <K extends keyof IDetailItem>(e: any, value: K) => {
     typeof (item[value]) === 'string' ? item[value] = e.target.value : item[value] = e.target.valueAsNumber;
     setItem(item)
   }
+
+  const handlePicture = (picture:any) =>{
+    console.log(picture);  
+  } 
 
   return (
     <div style={{ 'maxHeight': '80vh', 'overflow': 'auto' }}>
@@ -63,42 +58,25 @@ export default function Detail() {
       <Divider />
       <Descriptions title={`Product ID: ` + key} layout="vertical" labelStyle={{ 'fontWeight': '700' }} bordered >
         {/* below code map the description item object, the problem here is it cannot set the style for some certain line */}
-        {/* {Object.keys(descriptionItem).map((key) => {
-          console.log(key);
-
-          if (key === 'description') {
-            return <Descriptions.Item label={key} key={key} span={3} labelStyle={{ 'fontWeight': '700' }}>{isEdit ? <Input type='text' defaultValue={descriptionItem[key]} onChange={(e) => updateProduct(e, key)} /> : descriptionItem[key]}</Descriptions.Item>
-          }
-          else if (key === 'subTitle') {
-            return <Descriptions.Item label={key} key={key} span={2} labelStyle={{ 'fontWeight': '700' }}>{isEdit ? <Input type='text' defaultValue={descriptionItem[key]} onChange={(e) => updateProduct(e, key)} /> : descriptionItem[key]}</Descriptions.Item>
-          }
-          else {
-            return <Descriptions.Item key={key} label={key} labelStyle={{ 'fontWeight': '700' }}>{isEdit ? <Input type='text' defaultValue={descriptionItem[key]} onChange={(e) => updateProduct(e, key)} /> : descriptionItem[key]}</Descriptions.Item>
-          }
+        {/* {Object.keys(item).map((key) => {
+            return <Descriptions.Item label={key} key={key} labelStyle={{ 'fontWeight': '700' }}>{isEdit ? <Input type='text' defaultValue={item[key as keyof IDetailItem]} onChange={(e) => updateProduct(e, key as keyof IDetailItem)} /> : item[key as keyof IDetailItem]}</Descriptions.Item>
         })} */}
-        <Descriptions.Item label="Product Name" >{isEdit ? <Input type='text' defaultValue={item.product_name} onChange={(e) => updateProduct(e, 'product_name')} /> : item.product_name}</Descriptions.Item>
-        <Descriptions.Item label="Unit Price $" >{isEdit ? <Input type='number' defaultValue={item.unit_price} onChange={(e) => updateProduct(e, 'unit_price')} /> : item.unit_price}</Descriptions.Item>
-        <Descriptions.Item label="Discount" >{isEdit ? <Input type='number' defaultValue={item.discount} onChange={(e) => updateProduct(e, 'discount')} /> : item.discount}</Descriptions.Item>
-        <Descriptions.Item label="Category ID" >
-          {isEdit ? <Input type='number' defaultValue={item.categoryId} onChange={(e) => updateProduct(e, 'categoryId')} /> : item.categoryId}
-        </Descriptions.Item>
-        <Descriptions.Item label="Category Name" >
-          {isEdit ? <Input type='text' defaultValue={item.categoryName} onChange={(e) => updateProduct(e, 'categoryName')} /> : item.categoryName}
-        </Descriptions.Item>
-        <Descriptions.Item label="Product Type Id">
-          {isEdit ? <Input type='number' defaultValue={item.prodTypeId} onChange={(e) => updateProduct(e, 'prodTypeId')} /> : item.prodTypeId}
-        </Descriptions.Item>
         <Descriptions.Item label="Title" >{isEdit ? <Input type='text' defaultValue={item.title} onChange={(e) => updateProduct(e, 'title')} /> : item.title}</Descriptions.Item>
-        <Descriptions.Item label="Sub Title" span={2}>
-          {isEdit ? <Input type='text' defaultValue={item.subTitle} onChange={(e) => updateProduct(e, 'subTitle')} /> : item.subTitle}
+        <Descriptions.Item label="Category ID" >
+          {isEdit ? <Input type='number' defaultValue={item.category_id} onChange={(e) => updateProduct(e, 'category_id')} /> : item.category_id}
         </Descriptions.Item>
-        <Descriptions.Item label="Description" span={3}>
+        <Descriptions.Item label="Unit Price $" >{isEdit ? <Input type='number' defaultValue={item.price} onChange={(e) => updateProduct(e, 'price')} /> : item.price}</Descriptions.Item>
+        <Descriptions.Item label="is_active" >{isEdit ? <Input type='number' defaultValue={item.is_active} onChange={(e) => updateProduct(e, 'is_active')} /> : item.is_active}</Descriptions.Item>
+        <Descriptions.Item label="Description" span={2}>
           {isEdit ? <Input type='text' defaultValue={item.description} onChange={(e) => updateProduct(e, 'description')} /> : item.description}
         </Descriptions.Item>
-        <Descriptions.Item label="Picture" ><img style={{ 'maxHeight': '500px' }} src={productMedia.length >= 1 ? `https://storage.googleapis.com/luxe_media/wwwroot/${productMedia[0].url}` : undefined} alt='picture'></img></Descriptions.Item>
-        <Descriptions.Item label="Create On" span={2}>{item.createOn}</Descriptions.Item>
-        <Descriptions.Item label="Available Stock" >{isEdit ? <Input type='number' defaultValue={item.availableStock} onChange={(e) => updateProduct(e, 'availableStock')} /> : item.availableStock}</Descriptions.Item>
-        <Descriptions.Item label="Total Stock" >{isEdit ? <Input type='number' defaultValue={item.totalStock} onChange={(e) => updateProduct(e, 'totalStock')} /> : item.totalStock}</Descriptions.Item>
+        <Descriptions.Item label="Create On" >{item.created_at}</Descriptions.Item>
+        <Descriptions.Item label="Updated On" span={2}>{item.updated_at}</Descriptions.Item>
+        <Descriptions.Item label="Picture" >
+          <img style={{ 'maxHeight': '500px' }} src={product_image.length >= 1 ? imgURL : undefined} alt='picture'>
+          </img>
+         {isEdit?<UploadPic handlePicture={(pic)=>handlePicture(pic)}/>:null}
+        </Descriptions.Item>
       </Descriptions>
     </div>
   )

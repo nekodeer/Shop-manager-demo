@@ -1,10 +1,11 @@
 import React from 'react'
 import { Input, Form, Button } from 'antd';
-import {Item} from './ProductList/ProductList'
+import { NewProduct,Item } from '../types/data';
 
-type AddItemProps = {
+
+interface AddItemProps {
   isAdding: boolean,
-  getNewProduct({}): void
+  getNewProduct(product:NewProduct): void
 }
 
 export default function QuickAddItem(props: AddItemProps) {

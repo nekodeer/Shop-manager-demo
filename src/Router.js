@@ -6,7 +6,8 @@ import ProductListEditRow from "./components/ProductList/ProductListEdieRow"
 import ProductListEditableCell from "./components/ProductList/ProductListEditableCell"
 import Timesheet from "./components/User/Timesheet/Timesheet";
 import UserProfile from "./components/User/UserProfile"
-import Home from "./pages/Home"
+import Home from "./pages/Home";
+import Index from "./pages/Index"
 import Login from "./pages/Login"
 import Page404 from "./pages/Page404"
 import Register from "./pages/Register"
@@ -14,7 +15,10 @@ import Register from "./pages/Register"
 const route = [
   {
     path: '/',
-    element: <Navigate to="/home" />
+    element: <Navigate to="/index/home" />
+  },{
+    path:'/home',
+    element:<Navigate to="/index/home" />
   },
   {
     path: '/login',
@@ -24,9 +28,12 @@ const route = [
     element: <Register />
   },
   {
-    path: '/home',
-    element: <Home />,
+    path: '/index',
+    element: <Index />,
     children: [{
+      path:'home',
+      element:<Home/>
+    },{
       path: 'productlist',
       element: <EditableTable />
     }, {
@@ -43,6 +50,9 @@ const route = [
       element: <UserProfile/>
     },{
       path:'edit/:id',
+      element:<Detail/>
+    },{
+      path:'edit',
       element:<Detail/>
     },{
       path:'timesheet',

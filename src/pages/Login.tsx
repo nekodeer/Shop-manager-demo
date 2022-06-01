@@ -29,7 +29,7 @@ export default function Login() {
         localStorage.setItem('created_at', created_at)
         localStorage.setItem('updated_at', updated_at)
         message.success('Login Success')
-        setTimeout(() => navigate('/home'), 1500)
+        setTimeout(() => navigate('/index/home'), 1500)
       } else {
         message.error('Something error occur, please try again later')
       }

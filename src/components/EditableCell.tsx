@@ -1,5 +1,6 @@
 import React, { Fragment, useState} from 'react'
 
+
 interface EditCellProps{
   value:{id:number,data:string},
   setState: (arg:string,id:number)=>void

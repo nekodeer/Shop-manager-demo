@@ -138,7 +138,7 @@ export default function ProductList3() {
       <Alert
         banner={true}
         message="Important Information"
-        description="Only for this page, the product data is NOT received from the server. The product data was stored in the component state. You can double click each cell to edit."
+        description="Only for this page, the product data is NOT received from the server. The product data was stored in the component state. You can double click each cell to edit. If you edit the product information, it does not actually send a request to server"
         type="info"
         showIcon
       />

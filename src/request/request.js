@@ -15,6 +15,7 @@ instance.interceptors.request.use(function (config) {
   if(token){
     config.headers = {'token':token}
   }
+   
   return config;
 }, function (error) {
   // 对请求错误做些什么

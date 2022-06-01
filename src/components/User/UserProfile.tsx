@@ -2,6 +2,7 @@ import React from 'react'
 import { Avatar, Descriptions, Input, Form, Button, message } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { UpdatePassword } from '../../request/api';
+import moment from 'moment';
 
 export default function UserProfile() {
   const formItemLayout = {
@@ -40,10 +41,10 @@ export default function UserProfile() {
         <Descriptions.Item label="UserName">{localStorage.email}</Descriptions.Item>
         <Descriptions.Item label="User ID">{localStorage.user_id}</Descriptions.Item>
         <Descriptions.Item label="Created On" span={3}>
-          {localStorage.created_at}
+          {moment(localStorage.created_at).format('MMMM Do YYYY, h:mm:ss a')}
         </Descriptions.Item>
         <Descriptions.Item label="Updated On" span={3}>
-          {localStorage.updated_at}
+          {moment(localStorage.updated_at).format('MMMM Do YYYY, h:mm:ss a')}
         </Descriptions.Item>
         <Descriptions.Item label="Edit Password">
           <Form

@@ -6,7 +6,7 @@ export default function Page404() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    setTimeout(() => navigate('/Home'),2000)
+    setTimeout(() => navigate('/index'),2000)
   })
   return (
     <div>

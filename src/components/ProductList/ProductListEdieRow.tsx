@@ -1,14 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Pagination, Button, message, Divider, Alert } from 'antd';
 import { RequestApi } from '../../request/api';
-import { __String } from 'typescript';
-
-interface Product {
-  id: number | string;
-  product_name: string;
-  product_category: string;
-  unit_price: string;
-}
+import {Product} from '../../types/data'
 
 interface EditRow {
   status: boolean,
@@ -147,7 +140,7 @@ export default function ProductListEditRow() {
       <Alert
         banner={true}
         message="Important Information"
-        description="For this page, the product data IS received from the server. Single cell is NOT editable, but you can click the Edit button to edit the whole row."
+        description="For this page, the product data IS received from the server. Single cell is NOT editable, but you can click the Edit button to edit the whole row. If you edit the product information, it does not actually send a request to server"
         type="info"
         showIcon
       />

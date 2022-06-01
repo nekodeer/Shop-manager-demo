@@ -1,12 +1,9 @@
 import React, { useState } from 'react'
 import { Input, Space, Button, Form, message } from 'antd';
 import { CreateTimeSlot } from '../../../request/api';
-interface ITimeSlot {
-  start: string,
-  end: string,
-  task_id: number,
-  comments: string
-}
+import {ITimeSlot} from '../../../types/data'
+
+
 interface IProps {
   setRefresh: (a: boolean) => void
 }

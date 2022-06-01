@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Pagination, Button, Input, Alert, Divider } from 'antd';
 import { RequestApi } from '../../request/api';
+import {Product} from '../../types/data'
 
 interface ModifyRow{
   (id:number):void
@@ -14,12 +15,6 @@ type CellStatus={
   price?:boolean
 }
 
-interface Product{
-  id:number|string,
-  product_name:string,
-  product_category:string,
-  unit_price:string
-}
 
 export default function ProductList2() {
 
@@ -30,6 +25,7 @@ export default function ProductList2() {
   const [currentdata, setCurrentdata] = useState<any[]>([])
   const [pagesize,setPageSize] = useState<number>(10);
 
+  //splice the data according to the pagesize, for pagination 
   const spliceResult = (result: any[], dataArray: object[]) => {
     for (let i = 0, len = dataArray.length; i < len; i += pagesize) {
       result.push(dataArray.slice(i, i + pagesize));
@@ -151,7 +147,7 @@ export default function ProductList2() {
       <Alert
         banner={true}
         message="Important Information"
-        description="For this page, the product data IS received from the server. You can double click each cell to edit, or you could also click the Edit button to edit the whole row"
+        description="For this page, the product data IS received from the server. You can double click each cell to edit, or you could also click the Edit button to edit the whole row. If you edit the product information, it does not actually send a request to server"
         type="info"
         showIcon
       />

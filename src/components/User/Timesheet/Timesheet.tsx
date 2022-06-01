@@ -2,8 +2,9 @@ import { DeleteTimesheet, GetTimesheet, UpdateTimesheet } from '../../../request
 import AddTimeSlot from './AddTimeslot'
 import React, { useState, useEffect, Fragment } from 'react';
 import { Table, Input, InputNumber, Popconfirm, Form, Typography, Space, Button, message, Divider, Select } from 'antd';
+import {ITimeSlot} from '../../../types/data'
 
-interface Item {
+interface ITimeSheetItem {
   key: number;
   start: string;
   task_id:number;
@@ -17,7 +18,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   dataIndex: string;
   title: any;
   inputType: 'number' | 'text';
-  record: Item;
+  record: ITimeSheetItem;
   index: number;
   children: React.ReactNode;
 }
@@ -64,7 +65,8 @@ const EditableTable = () => {
   useEffect(() => {
     const params = Number(localStorage.getItem('user_id'))
     GetTimesheet(params).then((res: any) => {
-      const newRes: Item[] = res.map((resObj: any) => {
+      console.log(res);  
+      const newRes: ITimeSheetItem[] = res.map((resObj: any) => {
         Object.keys(resObj).forEach((item) => {
           if (resObj[item] === "" || resObj[item] === null || resObj[item] === undefined) {
             resObj[item] = 'Unknown';
@@ -78,9 +80,9 @@ const EditableTable = () => {
     )
   }, [refresh])
 
-  const isEditing = (record: Item) => record.key === editingKey;
+  const isEditing = (record: ITimeSheetItem) => record.key === editingKey;
 
-  const edit = (record: Partial<Item> & { key: React.Key }) => {
+  const edit = (record: Partial<ITimeSheetItem> & { key: React.Key }) => {
     form.setFieldsValue({ start: '', end: '', id: '', status: '', ...record });
     setEditingKey(record.key);
   };
@@ -92,13 +94,13 @@ const EditableTable = () => {
   //select status
   const { Option } = Select;
   const [selectStatus, setSelectStatus] = useState('')
-  function handleSelect(value: any) {
+  function handleSelect(value: string) {
     setSelectStatus(value)
     console.log(`selected ${value}`);
   }
   const save = async (key: React.Key) => {
     try {
-      const row = (await form.validateFields()) as Item;
+      const row = (await form.validateFields()) as ITimeSheetItem;
 
       const newData = [...data];
       const index = newData.findIndex(item => key === item.key);
@@ -116,14 +118,12 @@ const EditableTable = () => {
         setData(newData);
         setEditingKey('');
       }
-      const updatedTimesheet = {
+      const updatedTimesheet:ITimeSlot = {
         start: newData[index].start,
         end: newData[index].end,
         task_id: Number(newData[index].task_id),
         comments: newData[index].comments
       }
-      console.log(updatedTimesheet);
-      console.log(newData[index]);
       UpdateTimesheet(key, updatedTimesheet).then((res: any) => {
         message.success('Update success', res)
       }, (err) => message.error('something went wrong!', err))
@@ -146,7 +146,7 @@ const EditableTable = () => {
       title: 'Task id',
       dataIndex: 'task_id',
       width: '10%',
-      sorter: (a:Item, b:Item) => a.task_id-b.task_id,
+      sorter: (a:ITimeSheetItem, b:ITimeSheetItem) => a.task_id-b.task_id,
       editable: true,
     },
     {
@@ -171,7 +171,7 @@ const EditableTable = () => {
       title: 'Status',
       dataIndex: 'status',
       width: '15%',
-      render: (_: any, record: Item) => {
+      render: (_: any, record: ITimeSheetItem) => {
         const editable = isEditing(record);
 
         // return editable ? (
@@ -205,7 +205,7 @@ const EditableTable = () => {
     {
       title: 'operation',
       dataIndex: 'operation',
-      render: (_: any, record: Item) => {
+      render: (_: any, record: ITimeSheetItem) => {
         const editable = isEditing(record);
         return editable ? (
           <span>
@@ -240,7 +240,7 @@ const EditableTable = () => {
     }
     return {
       ...col,
-      onCell: (record: Item) => ({
+      onCell: (record: ITimeSheetItem) => ({
         record,
         inputType: col.dataIndex === 'task_id' ? 'number' : 'text',
         dataIndex: col.dataIndex,

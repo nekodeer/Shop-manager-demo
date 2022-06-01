@@ -1,29 +1,17 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Table, Input, InputNumber, Popconfirm, Form, Typography, message, Button, Space, Row, Col, Alert} from 'antd';
-import { AddNewProductApi, DeleteProduct, GetProductListNew, RequestApi, UpdateProduct} from '../../request/api';
+import { Table, Input, InputNumber, Popconfirm, Form, Typography, message, Button, Space, Row, Col, Alert } from 'antd';
+import { AddNewProductApi, DeleteProduct, GetProductListNew, RequestApi, UpdateProduct } from '../../request/api';
+import { Link } from 'react-router-dom';
 import SearchBar from '../SearchBar'
 import QuickAddItem from '../QuickAddItem'
 import { Breakpoint } from 'antd/lib/_util/responsiveObserve';
 import { useNavigate } from 'react-router-dom';
+import { NewProduct, Item } from '../../types/data';
 
-export interface Item {
-  key: number,
-  category_id: number,
-  price: number,
-  description: string,
-  title: string,
-  created_at?: string,
-  updated_at?: string,
-  is_active?: number,
-  product_image?: string
-}
 interface fnPropInterface {
   (a: string, b?: string): void
 }
 
-interface getProduct {
-  (product: Item): void
-}
 
 const originData: Item[] = [];
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
@@ -36,6 +24,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
 }
 
+//for each cell
 const EditableCell: React.FC<EditableCellProps> = ({
   editing,
   dataIndex,
@@ -70,21 +59,22 @@ const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
+//editable table from Antd
 const EditableTable = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState<Item[]>(originData);
   const [editingKey, setEditingKey] = useState<string | number>('');
-  const [searchData, setSearchData] = useState<boolean>(false);
+  const [isSearch, setisSearch] = useState<boolean>(false);
   const [isAdding, setIsAdding] = useState<boolean>(false)
   const navigate = useNavigate();
 
   const handleDelete = (key: React.Key) => {
-    DeleteProduct(key).then((res:any) =>{
-      if(res===true){
+    DeleteProduct(key).then((res: any) => {
+      if (res === true) {
         setData(data.filter(item => item.key !== key))
       }
     },
-    (err) => console.log(err))
+      (err) => console.log(err))
   };
 
   useEffect(() => {
@@ -93,15 +83,17 @@ const EditableTable = () => {
       // const newRes = JSON.parse(JSON.stringify(res).replace(/id/g, 'key'))
       const item: Item[] = res.map((dataObj: any) => {
         if (dataObj.category_id) {
-          return { key: dataObj.id, title: dataObj.title, category_id: dataObj.category_id, price: dataObj.price, ...dataObj }
+          // return { key: dataObj.id, title: dataObj.title, category_id: dataObj.category_id, price: dataObj.price, ...dataObj }
+          return { key: dataObj.id, ...dataObj }
         }
         else {
-          return { key: dataObj.id, title: dataObj.title, category_id: "Undefined Category", price: dataObj.price, ...dataObj }
+          // return { key: dataObj.id, title: dataObj.title, category_id: "Undefined Category", price: dataObj.price, ...dataObj }
+          return { key: dataObj.id, category_id: "Undefined Category", ...dataObj }
         }
       })
       setData(item)
     })
-  }, [searchData])
+  }, [isSearch])
 
   const isEditing = (record: Item) => record.key === editingKey;
 
@@ -134,10 +126,13 @@ const EditableTable = () => {
         setData(newData);
         setEditingKey('');
       }
-      const updatedItem = { title: newData[index].title, is_active: newData[index].is_active, price: newData[index].price, description: newData[index].description, category_id: newData[index].category_id }
+      //Prepare the updated product in require format
+      const updatedItem: NewProduct = { title: newData[index].title, is_active: newData[index].is_active, price: newData[index].price, description: newData[index].description, category_id: newData[index].category_id }
+      console.log(updatedItem);
+
       // update the product information to server
       UpdateProduct(newData[index].key, updatedItem).then((res) => {
-        console.log('server msg',res);
+        console.log('server msg', res);
         message.success('Edit Product Success!')
       });
     } catch (errInfo) {
@@ -161,7 +156,7 @@ const EditableTable = () => {
       render: (_: any, record: Item) => {
         return <a href='#' onClick={(e) => {
           e.preventDefault();
-          navigate('/home/edit/' + record.key,
+          navigate('/index/edit/' + record.key,
             {
               replace: false,
               state: data.filter((o) => o.key === record.key,)
@@ -208,8 +203,9 @@ const EditableTable = () => {
             <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.key)}>
               <Button size='small'>Delete</Button>
             </Popconfirm>
-            <Typography.Link disabled={editingKey !== ''} onClick={() => navigate('/home/edit/' + record.key, { replace: false, state: data.filter((o) => o.key === record.key,) })}>
-              {/* <Link to={`edit/${record.key}`}>View Product Detail</Link> */}
+            {/* <Typography.Link disabled={editingKey !== ''} onClick={() => navigate('/index/edit/' + record.key, { replace: false, state: data.filter((o) => o.key === record.key,) })}> */}
+            <Typography.Link disabled={editingKey !== ''} onClick={() => navigate('/index/edit/' + record.key, { replace: false, state: record.key })}>
+              {/* <Link to={`/index/edit/${record.key}`}>View Product Detail</Link> */}
               <Button size='small'>View/Edit Product Detail</Button>
             </Typography.Link>
           </Space>
@@ -236,7 +232,7 @@ const EditableTable = () => {
   //filter the data to match the product category and set the data array
   const searchProp: fnPropInterface = (arg, option) => {
     if (arg === '') {
-      setSearchData(!searchData)
+      setisSearch(!isSearch)
     } else {
       //search by category ID
       const newData = option === 'Category' ? data.filter((data: Item) => {
@@ -250,16 +246,16 @@ const EditableTable = () => {
       setData(newData);
       if (newData.length === 0) {
         message.error('no product found!')
-        setSearchData(!searchData);
+        setisSearch(!isSearch);
       }
     }
   }
   //get new product from quick add item component
-  const getNewProduct: getProduct = (product) => {
+  const getNewProduct = (product: NewProduct): void => {
     // setData([...data, product])
     setIsAdding(false);
-    AddNewProductApi(product).then((res:any) => {
-      const newRes = {key:res.id,...res}
+    AddNewProductApi(product).then((res: any) => {
+      const newRes = { key: res.id, ...res }
       setData([...data, newRes])
     })
   }
@@ -274,6 +270,7 @@ const EditableTable = () => {
       />
       <Row justify='space-between' style={{ 'minHeight': '60px' }} align='middle'>
         <Col lg={{ span: 6 }}><SearchBar searchProp={(arg, option) => searchProp(arg, option)} /></Col>
+        <Col><Button onClick={()=>navigate('/index/edit')}>Create product in Detail Mode</Button></Col>
         <Col lg={{ span: 14 }}>
           <Row justify='space-between'>
             <Col>
@@ -283,7 +280,7 @@ const EditableTable = () => {
                 </Space>
                 : <Button style={{ width: 150 }} onClick={() => setIsAdding(true)}>Quick Add Product</Button>}
             </Col>
-            <Col><QuickAddItem isAdding={isAdding} getNewProduct={(e: Item) => getNewProduct(e)} /></Col>
+            <Col><QuickAddItem isAdding={isAdding} getNewProduct={(e: NewProduct) => getNewProduct(e)} /></Col>
           </Row>
         </Col>
       </Row>

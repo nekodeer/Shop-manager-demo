@@ -7,6 +7,8 @@ export const LoginApi = (params) => request.post('/api/login',params)
 
 export const UpdateProduct = (id,params) => request.post(`/api/product/${id}`,params)
 
+export const UpdateProductList = (id,params) => request.put(`/api/product/${id}`,params)
+
 export const AddNewProductApi = (params) => request.post('/api/products',params)
 
 export const GetProductListNew = () => request.get('/api/products') 

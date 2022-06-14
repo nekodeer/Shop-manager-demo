@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Table, Input, InputNumber, Popconfirm, Form, Typography, message, Button, Space, Row, Col, Alert } from 'antd';
-import { AddNewProductApi, DeleteProduct, GetProductListNew, RequestApi, UpdateProduct } from '../../request/api';
+import { AddNewProductApi, DeleteProduct, GetProductListNew, RequestApi, UpdateProductList } from '../../request/api';
 import { Link } from 'react-router-dom';
 import SearchBar from '../SearchBar'
 import QuickAddItem from '../QuickAddItem'
@@ -99,7 +99,7 @@ const EditableTable = () => {
 
   const edit = (record: Partial<Item> & { key: React.Key }) => {
     form.setFieldsValue({ title: '', category_id: '', price: '', ...record });
-
+    
     setEditingKey(record.key);
   };
 
@@ -131,7 +131,7 @@ const EditableTable = () => {
       console.log(updatedItem);
 
       // update the product information to server
-      UpdateProduct(newData[index].key, updatedItem).then((res) => {
+      UpdateProductList(newData[index].key, updatedItem).then((res) => {     
         console.log('server msg', res);
         message.success('Edit Product Success!')
       });
